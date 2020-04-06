@@ -48,6 +48,7 @@ def read_conf():
  options.cnn_act=Config.get('cnn', 'cnn_act')
  options.cnn_drop=Config.get('cnn', 'cnn_drop')
  options.use_SinConv=Config.get('cnn', 'use_SinConv')
+ options.use_mel_scale = Config.get('cnn', 'use_mel_scale')
 
 
  #[dnn]
