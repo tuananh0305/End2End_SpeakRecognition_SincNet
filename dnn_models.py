@@ -55,7 +55,7 @@ class SincConv_fast(nn.Module):
     def to_hz(mel):
         return 700 * (10 ** (mel / 2595) - 1)
 
-    def __init__(self, out_channels, kernel_size, sample_rate=16000, in_channels=1,
+    def __init__(self, out_channels, kernel_size, sample_rate=16000, use_mel_scale=True, in_channels=1,
                  stride=1, padding=0, dilation=1, bias=False, groups=1, min_low_hz=50, min_band_hz=50):
 
         super(SincConv_fast,self).__init__()
@@ -90,10 +90,15 @@ class SincConv_fast(nn.Module):
         low_hz = 30
         high_hz = self.sample_rate / 2 - (self.min_low_hz + self.min_band_hz)
 
-        mel = np.linspace(self.to_mel(low_hz),
-                          self.to_mel(high_hz),
-                          self.out_channels + 1)
-        hz = self.to_hz(mel)
+        if (use_mel_scale):
+            mel = np.linspace(self.to_mel(low_hz),
+                            self.to_mel(high_hz),
+                            self.out_channels + 1)
+            hz = self.to_hz(mel)
+        else:
+            hz = np.linspace(low_hz,
+                            high_hz,
+                            self.out_channels + 1)
         
 
         # filter lower frequency (out_channels, 1)
@@ -365,6 +370,7 @@ class SincNet(nn.Module):
     def __init__(self,options):
        super(SincNet,self).__init__()
        self.use_SinConv=options['use_SinConv']              # add use_SinConv variable
+       self.use_mel_scale=options['use_mel_scale']          # add use_mel_scale variable
     
        self.cnn_N_filt=options['cnn_N_filt']
        self.cnn_len_filt=options['cnn_len_filt']
@@ -418,7 +424,7 @@ class SincNet(nn.Module):
 
          if i==0:
              if (self.use_SinConv):
-                 self.conv.append(SincConv_fast(self.cnn_N_filt[0],self.cnn_len_filt[0],self.fs))
+                 self.conv.append(SincConv_fast(self.cnn_N_filt[0],self.cnn_len_filt[0],self.fs,self.use_mel_scale))
              else:
                  self.conv.append(nn.Conv1d(1, self.cnn_N_filt[i], self.cnn_len_filt[i]))
             

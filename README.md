@@ -60,6 +60,14 @@ python speaker_id.py --cfg=cfg/SincNet_TIMIT.cfg
 
 The network might take several hours to converge (depending on the speed of your GPU card). In our case, using an *nvidia TITAN X*, the full training took about 24 hours. If you use the code within a cluster is crucial to copy the normalized dataset into the local node, since the current version of the code requires frequent accesses to the stored wav files. Note that several possible optimizations to improve the code speed are not implemented in this version since are out of the scope of this work.
 
+**3. New features.**
+
+- CNN-based: We can switch the first convolution layer between sinc convolution and standard convolution. To do that, modify the *[cnn]* section of *cfg/SincNet_TIMIT.cfg* file. Set "use_SinConv" = True if we want to use sinc convolution and Set "use_SinConv" = True if we want to use standard convolution.
+We have to change "cnn_N_filt" and "cnn_len_filt" according to.
+
+- Linearly spaced: We can swtich the bank filters between mel-scale and linearly spaced. To do that, modify the *[cnn]* section of *cfg/SincNet_TIMIT.cfg* file. Set "use_mel_scale" = False if we want to use linearly spaced bank filters and vice versa. 
+
+- Evaluation step: we add the evaluation step in which, we load a pre-trained model and evaluate on test set. To do that, modify the *[data]* section of *cfg/SincNet_TIMIT.cfg* file. Set "isTraing" = False and set the path of pre-trained model (pt_file=exp/SincNet_TIMIT/model_raw.pkl)
 
 ## References
 
