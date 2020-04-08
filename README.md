@@ -69,6 +69,15 @@ We have to change "cnn_N_filt" and "cnn_len_filt" according to.
 
 - Evaluation step: we add the evaluation step in which, we load a pre-trained model and evaluate on test set. To do that, modify the *[data]* section of *cfg/SincNet_TIMIT.cfg* file. Set "isTraing" = False and set the path of pre-trained model (pt_file=exp/SincNet_TIMIT/model_raw.pkl)
 
+**3. Results.**
+
+Compare Classification Error (measured at frame level) and Classification Error (measured at sentence level) among CNN-based, SincNet-mel-scale, SincNet-linearly-spaced:
+
+<img src="https://github.com/tuananh0305/End2End_SpeakRecognition_SincNet/blob/master/FrameErrorRate.png" width="400" img align="centre">
+
+<img src="https://github.com/tuananh0305/End2End_SpeakRecognition_SincNet/blob/master/SentenceErrorRate.png" width="400" img align="centre">
+
+
 ## References
 
 [1] Mirco Ravanelli, Yoshua Bengio, “Speaker Recognition from raw waveform with SincNet” [Arxiv](http://arxiv.org/abs/1808.00158)
