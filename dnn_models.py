@@ -103,7 +103,7 @@ class SincConv_fast(nn.Module):
         plt.show()
 
 
-    def __init__(self, out_channels, kernel_size, sample_rate=16000, use_mel_scale=True, in_channels=1,
+    def __init__(self, out_channels, kernel_size, sample_rate=16000, use_mel_scale=True, use_randomly_spaced=False, in_channels=1,
                  stride=1, padding=0, dilation=1, bias=False, groups=1, min_low_hz=50, min_band_hz=50):
 
         super(SincConv_fast,self).__init__()
@@ -144,9 +144,15 @@ class SincConv_fast(nn.Module):
                             self.out_channels + 1)
             hz = self.to_hz(mel)
         else:
-            hz = np.linspace(low_hz,
-                            high_hz,
-                            self.out_channels + 1)
+            hz = np.linspace(low_hz, high_hz, self.out_channels + 1)  # initialize filterbanks such that they are equally spaced in frequency
+            if (use_randomly_spaced):
+
+                random_shift = 60 * (np.random.random_sample((self.out_channels-1,)) - 0.5)  # add random shift a value from -30 to 30
+                hz[1:-1] += random_shift
+            # print(hz)
+
+
+            
         
 
         # filter lower frequency (out_channels, 1)
@@ -426,6 +432,7 @@ class SincNet(nn.Module):
        super(SincNet,self).__init__()
        self.use_SinConv=options['use_SinConv']              # add use_SinConv variable
        self.use_mel_scale=options['use_mel_scale']          # add use_mel_scale variable
+       self.use_randomly_spaced=options['use_randomly_spaced']          # add use_randomly_spaced variable
     
        self.cnn_N_filt=options['cnn_N_filt']
        self.cnn_len_filt=options['cnn_len_filt']
@@ -479,7 +486,7 @@ class SincNet(nn.Module):
 
          if i==0:
              if (self.use_SinConv):
-                 self.conv.append(SincConv_fast(self.cnn_N_filt[0],self.cnn_len_filt[0],self.fs,self.use_mel_scale))
+                 self.conv.append(SincConv_fast(self.cnn_N_filt[0],self.cnn_len_filt[0],self.fs,self.use_mel_scale,self.use_randomly_spaced))
              else:
                  self.conv.append(nn.Conv1d(1, self.cnn_N_filt[i], self.cnn_len_filt[i]))
             

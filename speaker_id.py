@@ -94,6 +94,7 @@ cnn_act=list(map(str, options.cnn_act.split(',')))
 cnn_drop=list(map(float, options.cnn_drop.split(',')))
 use_SinConv=str_to_bool(options.use_SinConv)
 use_mel_scale=str_to_bool(options.use_mel_scale)
+use_randomly_spaced=str_to_bool(options.use_randomly_spaced)
 
 
 #[dnn]
@@ -171,7 +172,8 @@ CNN_arch = {'input_dim': wlen,
           'cnn_act': cnn_act,
           'cnn_drop':cnn_drop,
           'use_SinConv':use_SinConv,
-          'use_mel_scale':use_mel_scale,          
+          'use_mel_scale':use_mel_scale,
+          'use_randomly_spaced':use_randomly_spaced,          
           }
 
 CNN_net=CNN(CNN_arch)
@@ -426,7 +428,7 @@ else:
                   'DNN2_model_par': DNN2_net.state_dict(),
                   }
       if (use_SinConv):
-        torch.save(checkpoint,output_folder+'/Sinc_model_raw.pkl')
+        torch.save(checkpoint,output_folder+'/Sinc_random_model_raw.pkl')
       else:
         torch.save(checkpoint,output_folder+'/CNN_model_raw.pkl')
 
