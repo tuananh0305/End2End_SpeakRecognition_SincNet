@@ -220,6 +220,7 @@ if pt_file!='none':
    CNN_net.load_state_dict(checkpoint_load['CNN_model_par'])
    DNN1_net.load_state_dict(checkpoint_load['DNN1_model_par'])
    DNN2_net.load_state_dict(checkpoint_load['DNN2_model_par'])
+   CNN_net.conv[0].showCumulativeFreq()
 
 
 

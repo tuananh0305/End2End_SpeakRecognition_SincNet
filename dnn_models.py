@@ -5,6 +5,9 @@ import torch.nn as nn
 import sys
 from torch.autograd import Variable
 import math
+import matplotlib.pyplot as plt
+from matplotlib import mlab
+from torchvision import transforms
 
 def flip(x, dim):
     xsize = x.size()
@@ -55,6 +58,51 @@ class SincConv_fast(nn.Module):
     def to_hz(mel):
         return 700 * (10 ** (mel / 2595) - 1)
 
+    def showCumulativeFreq(self ):
+        self.n_ = self.n_.cpu()
+        self.window_ = self.window_.cpu()
+
+        low = self.min_low_hz  + torch.abs(self.low_hz_.cpu())        
+        high = torch.clamp(low + self.min_band_hz + torch.abs(self.band_hz_.cpu()),self.min_low_hz,self.sample_rate/2)
+        band=(high-low)[:,0]
+        
+        f_times_t_low = torch.matmul(low, self.n_)
+        f_times_t_high = torch.matmul(high, self.n_)
+
+        band_pass_left=((torch.sin(f_times_t_high)-torch.sin(f_times_t_low))/(self.n_/2))*self.window_ # Equivalent of Eq.4 of the reference paper (SPEAKER RECOGNITION FROM RAW WAVEFORM WITH SINCNET). I just have expanded the sinc and simplified the terms. This way I avoid several useless computations. 
+        band_pass_center = 2*band.view(-1,1)
+        band_pass_right= torch.flip(band_pass_left,dims=[1])
+        
+        
+        band_pass=torch.cat([band_pass_left,band_pass_center,band_pass_right],dim=1)
+
+        
+        band_pass = band_pass / (2*band[:,None])
+        
+
+        self.filters = (band_pass).view(self.out_channels, 1, self.kernel_size)
+        # print(self.filters[0][0].detach().cpu().numpy())
+        # print(band_pass_left[0].detach().numpy())
+        CumulativeMag = np.zeros(int(self.kernel_size/2) +1)
+        Freq = np.zeros(int(self.kernel_size/2) +1)
+        for i in range(self.out_channels):
+            mag_spec = mlab.magnitude_spectrum(self.filters[i][0].detach().cpu().numpy(), Fs = self.sample_rate)
+            CumulativeMag += mag_spec[0]
+            Freq = mag_spec[1]
+        # print(CumulativeFreq)
+        # CumulativeFreq = CumulativeFreq / np.linalg.norm(CumulativeFreq)
+        fig, ax = plt.subplots()
+        ax.plot(Freq, CumulativeMag)
+
+        ax.set_title('Cumulative frequency response of the SincNet filters')
+        ax.set_xlabel('Freqency [Hz]')
+        ax.set_ylabel('Normalized Filter Sum')
+        ax.set_xlim([0, 4000])
+        # leg = ax.legend()
+
+        plt.show()
+
+
     def __init__(self, out_channels, kernel_size, sample_rate=16000, use_mel_scale=True, in_channels=1,
                  stride=1, padding=0, dilation=1, bias=False, groups=1, min_low_hz=50, min_band_hz=50):
 
@@ -91,7 +139,7 @@ class SincConv_fast(nn.Module):
         high_hz = self.sample_rate / 2 - (self.min_low_hz + self.min_band_hz)
 
         if (use_mel_scale):
-            mel = np.linspace(self.to_mel(low_hz),
+            mel = np.linspace(self.to_mel(low_hz), 
                             self.to_mel(high_hz),
                             self.out_channels + 1)
             hz = self.to_hz(mel)
@@ -116,6 +164,10 @@ class SincConv_fast(nn.Module):
         # (1, kernel_size/2)
         n = (self.kernel_size - 1) / 2.0
         self.n_ = 2*math.pi*torch.arange(-n, 0).view(1, -1) / self.sample_rate # Due to symmetry, I only need half of the time axes
+
+        # print('self.n_',self.n_.shape)
+        # print('self.low_hz_',self.low_hz_.shape)
+        self.showCumulativeFreq()
 
  
 
@@ -157,6 +209,9 @@ class SincConv_fast(nn.Module):
 
         self.filters = (band_pass).view(
             self.out_channels, 1, self.kernel_size)
+
+        # print('band_pass_left',band_pass_left.shape)
+        # print('self.filters',self.filters.shape)
 
         return F.conv1d(waveforms, self.filters, stride=self.stride,
                         padding=self.padding, dilation=self.dilation,
