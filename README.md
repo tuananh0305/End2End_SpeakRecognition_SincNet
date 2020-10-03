@@ -1,17 +1,20 @@
+# SincNet
+
+In this project, we will replicate the SincNet model [1] for the speaker identification. Throughout this project, we can evaluate the performance of the SincNet architecture
+integrated Machine Learning algorithms in speech identification. In addition, we try to change configurations in model architecture, parameters, optimization algorithms, to get
+various performances in speech identification tasks, then compare them with those of the original model in the paper. Throughout these implementation tasks, we can get
+familiar with the interesting concepts of speech processing, such as window and filters, Discrete Fourier transform, cepstral analysis, and how to combine them in a Deep
+Learning architecture to solve problems in speech identification and verification as well.
+
 # Citation
+
 This repository is base on *Mirco Ravanelli, Yoshua Bengio, “Speaker Recognition from raw waveform with SincNet”* [Arxiv](http://arxiv.org/abs/1808.00158) and his repository (https://github.com/mravanelli/SincNet).
 
-# SincNet
-SincNet is a neural architecture for processing **raw audio samples**. It is a novel Convolutional Neural Network (CNN) that encourages the first convolutional layer to discover more **meaningful filters**. SincNet is based on parametrized sinc functions, which implement band-pass filters.
 
-In contrast to standard CNNs, that learn all elements of each filter, only low and high cutoff frequencies are directly learned from data with the proposed method. This offers a very compact and efficient way to derive a **customized filter bank** specifically tuned for the desired application. 
+# Data set
 
-This project releases a collection of codes and utilities to perform speaker identification with SincNet.
-An example of speaker identification with the TIMIT database is provided. If you are interested in **SincNet applied to speech recognition you can take a look into the PyTorch-Kaldi github repository (https://github.com/mravanelli/pytorch-kaldi).** 
-
-<img src="https://github.com/mravanelli/SincNet/blob/master/SincNet.png" width="400" img align="right">
-
-[Take a look into our video introduction to SincNet](https://www.youtube.com/watch?v=mXQBObRGUgk&feature=youtu.be)
+Our training dataset is TIMIT Acoustic-Phonetic Continuous Speech Corpus, influenced by John S. Garofolo, Lori F. Lamel, William M. Fisher, Jonathan G. Fiscus, David S. Pallett, Nancy L. Dahlgren, Victor Zue [2]. The TIMIT corpus of read speech is designed to provide speech data for acoustic-phonetic studies and for the development and evaluation of automatic speech recognition systems. It contains ​a total of 6300 sentences, 10 sentences spoken by each of 630 speakers from 8 major dialect regions of the United States. A sentence data consist of a speech waveform file (.wav) and
+three associated transcription files (.txt, .wrd, .phn).
 
 
 ## Prerequisites
@@ -58,16 +61,19 @@ The name of directories in TIMIT dataset above are uppercase while the original 
 python speaker_id.py --cfg=cfg/SincNet_TIMIT.cfg
 ``
 
-The network might take several hours to converge (depending on the speed of your GPU card). In our case, using an *nvidia TITAN X*, the full training took about 24 hours. If you use the code within a cluster is crucial to copy the normalized dataset into the local node, since the current version of the code requires frequent accesses to the stored wav files. Note that several possible optimizations to improve the code speed are not implemented in this version since are out of the scope of this work.
-
 **3. New features.**
 
-- CNN-based: We can switch the first convolution layer between sinc convolution and standard convolution. To do that, modify the *[cnn]* section of *cfg/SincNet_TIMIT.cfg* file. Set "use_SinConv" = True if we want to use sinc convolution and Set "use_SinConv" = True if we want to use standard convolution.
+- CNN-based: We can switch the first convolution layer between sinc convolution and standard convolution. To do that, modify the **[cnn]** section of **cfg/SincNet_TIMIT.cfg** file. Set "use_SinConv" = True if we want to use sinc convolution and Set "use_SinConv" = True if we want to use standard convolution.
 We have to change "cnn_N_filt" and "cnn_len_filt" according to.
 
-- Linearly spaced: We can swtich the bank filters between mel-scale and linearly spaced. To do that, modify the *[cnn]* section of *cfg/SincNet_TIMIT.cfg* file. Set "use_mel_scale" = False if we want to use linearly spaced bank filters and vice versa. 
+- Linearly spaced: We can swtich the bank filters between mel-scale and linearly spaced. To do that, modify the **[cnn]** section of **cfg/SincNet_TIMIT.cfg** file. Set "use_mel_scale" = False if we want to use linearly spaced bank filters and vice versa. 
 
-- Evaluation step: we add the evaluation step in which, we load a pre-trained model and evaluate on test set. To do that, modify the *[data]* section of *cfg/SincNet_TIMIT.cfg* file. Set "isTraing" = False and set the path of pre-trained model (pt_file=exp/SincNet_TIMIT/model_raw.pkl)
+- Evaluation step: we add the evaluation step in which, we load a pre-trained model and evaluate on test set. To do that, modify the **[data]** section of **cfg/SincNet_TIMIT.cfg** file. Set "isTraing" = False and set the path of pre-trained model (pt_file=exp/SincNet_TIMIT/model_raw.pkl)
+
+- Draw Cumulative frequency response of learned filter: We calculate the cumulative frequency response of a set of learned filters with initialized
+weights being mel-scaled. After getting learned filters from training, we apply DFT to these filters in time-domain to transfer it to frequency domain, we will get the magnitude of frequency response. Then we sum them to get their cumulative frequency responses.
+
+
 
 **3. Results.**
 
@@ -76,6 +82,13 @@ Compare Classification Error (measured at frame level) and Classification Error 
 <img src="https://github.com/tuananh0305/End2End_SpeakRecognition_SincNet/blob/master/FrameErrorRate.png" width="400" img align="centre">
 
 <img src="https://github.com/tuananh0305/End2End_SpeakRecognition_SincNet/blob/master/SentenceErrorRate.png" width="400" img align="centre">
+
+We train the SincNet model with Adam optimizer and different learning rate and choose the best one (lr=0.001), then we train this configuration 10 times and get the average result.
+
+The table below compares the ​Frame Error Rate and ​Classification ​Error Rate of our modified model and the given author’s model (Github) and the result of the SincNet paper.
+
+![](https://github.com/tuananh0305/End2End_SpeakRecognition_SincNet/blob/master/result.png)
+
 
 
 ## References
