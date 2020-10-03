@@ -92,5 +92,6 @@ The table below compares the ​Frame Error Rate and ​Classification ​Error 
 
 
 ## References
+[[1]](https://arxiv.org/abs/1808.00158) ​Ravanelli, Mirco, and Yoshua Bengio. "Speaker recognition from raw waveform with sincnet." ​2018 IEEE Spoken Language Technology Workshop (SLT)​. IEEE, 2018.
 
-[1] Mirco Ravanelli, Yoshua Bengio, “Speaker Recognition from raw waveform with SincNet” [Arxiv](http://arxiv.org/abs/1808.00158)
+[[2]](https://arxiv.org/abs/1904.08104) Jung, Jee-weon, et al. "Rawnet: Advanced end-to-end deep neural network using raw waveforms for text-independent speaker verification." ​arXiv preprint arXiv:1904.08104​ (2019).
